@@ -68,3 +68,36 @@ AstroShield AI is a multi-source space safety analysis system that combines real
 ---
 
 ## 🚀 Project Pipeline
+
+NASA APIs → Data Collection → Feature Engineering → SMOTE → XGBoost → Evaluation → FastAPI (coming soon) → Azure Deploy (coming soon)
+
+
+
+---
+
+## 🔜 Upcoming Features
+
+- [ ] FastAPI REST endpoint for real-time asteroid risk prediction
+- [ ] Live ISS location tracking
+- [ ] Interactive 3D Earth + asteroid visualization
+- [ ] Azure cloud deployment
+- [ ] Safe orbit zone recommender
+
+---
+
+## 👨‍💻 Author
+
+**Divyansh Tiwari**
+3rd Year BCA | ML Engineer
+
+[![GitHub](https://img.shields.io/badge/GitHub-DivyTiwari--ship--it-black)](https://github.com/DivyTiwari-ship-it)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-blue)](https://divytiwari-ship-it.github.io/divyanshtiwari.github.io/)
+[![Kaggle](https://img.shields.io/badge/Kaggle-Profile-20BEFF)](https://www.kaggle.com/code/divyanshtiwari01/spacex)
+[![Fiverr](https://img.shields.io/badge/Fiverr-Hire%20Me-1DBF73)](https://www.fiverr.com/s/GzDkpxL)
+
+---
+
+## 📜 License
+
+MIT License — feel free to use and build on this project.
+
