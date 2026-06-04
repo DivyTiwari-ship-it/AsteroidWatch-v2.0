@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as str
 import pickle
 import numpy as np
 import pandas as pd
@@ -7,14 +7,106 @@ import math
 import requests
 from datetime import datetime, timedelta, timezone
 
-# Load trained ML Model
 model = pickle.load(open('asteroidmodel.pkl', 'rb'))
 
 st.set_page_config(page_title="AstroShield AI", page_icon="🛸", layout="wide")
-st.title("🛸 AstroShield AI")
-st.subheader("Real NASA + JPL Data | Science-Backed Hazard Predictor & Space Grid")
 
-# Master planet properties dictionary to guarantee keys are NEVER missing
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
+
+html, body, [data-testid="stAppViewContainer"] {
+    background-color: #03030c !important;
+    font-family: 'Inter', sans-serif;
+}
+
+.main-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3.2rem !important;
+    font-weight: 900 !important;
+    background: linear-gradient(45deg, #00f2fe, #4facfe, #9b51e0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(0, 242, 254, 0.25);
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.sub-title {
+    color: #7f8c8d !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+}
+
+div.stButton > button:first-child {
+    font-family: 'Orbitron', sans-serif !important;
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%) !important;
+    color: #03030c !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 12px 24px !important;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.4) !important;
+    transition: all 0.3s ease-in-out !important;
+}
+
+div.stButton > button:first-child:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.8) !important;
+    color: #000000 !important;
+}
+
+.hazard-card {
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.12) 0%, rgba(15, 3, 3, 0.9) 100%);
+    border: 2px solid #ff4444;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);
+    margin: 15px 0px;
+}
+
+.safe-card {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.12) 0%, rgba(3, 15, 8, 0.9) 100%);
+    border: 2px solid #00ff88;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    margin: 15px 0px;
+}
+
+.card-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+}
+
+.metrics-val {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 10px 0px;
+    text-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+button[data-baseweb="tab"] {
+    font-family: 'Orbitron', sans-serif !important;
+    font-size: 1.05rem !important;
+    letter-spacing: 1px;
+}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<h1 class="main-title">🛸 ASTROSHIELD AI</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Orbital Forecast Center | NASA Data System</p>', unsafe_allow_html=True)
+
 PLANET_METRICS = {
     'Mercury': {'radius': 0.387, 'size': 8,  'color': '#b5b5b5'},
     'Venus':   {'radius': 0.723, 'size': 8,  'color': '#e8cda0'},
@@ -23,7 +115,6 @@ PLANET_METRICS = {
     'Saturn':  {'radius': 9.537, 'size': 15, 'color': '#e4d191'},
 }
 
-# ════════════ LIVE JPL HORIZONS DATA FETCHING ════════════
 def get_planet_position(planet_id):
     url = "https://ssd.jpl.nasa.gov/api/horizons.api"
     today = datetime.now(timezone.utc)
@@ -36,7 +127,7 @@ def get_planet_position(planet_id):
         'OBJ_DATA': 'NO',
         'MAKE_EPHEM': 'YES',
         'EPHEM_TYPE': 'VECTORS',
-        'CENTER': '500@10',  # Sun-centered
+        'CENTER': '500@10',
         'START_TIME': start,
         'STOP_TIME': stop,
         'STEP_SIZE': '1d',
@@ -75,7 +166,6 @@ def load_cosmic_positions():
     planets = {'Mercury': '199', 'Venus': '299', 'Mars': '499', 'Jupiter': '599', 'Saturn': '699'}
     positions = {}
     
-    # Static strict fallbacks to protect against KeyError
     fallbacks = {
         'Mercury': {'x': -0.3637, 'y': 0.0705, 'z': 0.0391},
         'Venus':   {'x': -0.6892, 'y': 0.2009, 'z': 0.0425},
@@ -90,7 +180,6 @@ def load_cosmic_positions():
         if not pos:
             pos = fallbacks[name]
         
-        # Inject core style fields to guarantee safety across references
         pos['radius'] = PLANET_METRICS[name]['radius']
         pos['size'] = PLANET_METRICS[name]['size']
         pos['color'] = PLANET_METRICS[name]['color']
@@ -99,40 +188,51 @@ def load_cosmic_positions():
     return positions
 
 planet_positions = load_cosmic_positions()
-
-# Static Coordinates Baseline Matrix
 earth_pos = {'x': -0.3182, 'y': 0.9389, 'z': 0.0}
 earth_angle = math.atan2(earth_pos['y'], earth_pos['x'])
 
-# Navigation System Setup
 tab1, tab2 = st.tabs(["🔍 Predict Threat", "🪐 Solar System"])
 
 with tab1:
-    col1, col2 = st.columns(2)
-    with col1:
-        magnitude = st.slider("Absolute Magnitude (H)", 10.0, 35.0, 20.0)
-        diameter  = st.slider("Estimated Diameter (km)", 0.001, 10.0, 0.5)
-        velocity  = st.slider("Velocity (km/s)", 1.0, 40.0, 15.0)
-    with col2:
-        miss_dist = st.number_input("Miss Distance (km)", value=500000.0)
+    with st.container(border=True):
+        st.markdown("<p style='font-family:\"Orbitron\", sans-serif; font-weight: bold; color: #00f2fe; margin-bottom: 15px;'>🎛️ ORBITAL TELEMETRY PARAMETERS</p>", unsafe_allow_html=True)
+        col1, col2 = st.columns(2)
+        with col1:
+            magnitude = st.slider("Absolute Magnitude (H)", 10.0, 35.0, 20.0)
+            diameter  = st.slider("Estimated Diameter (km)", 0.001, 10.0, 0.5)
+            velocity  = st.slider("Velocity (km/s)", 1.0, 40.0, 15.0)
+        with col2:
+            miss_dist = st.number_input("Miss Distance (km)", value=500000.0, step=50000.0)
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            predict_btn = st.button("⚡ EXECUTE NEURAL THREAT ASSESSMENT", use_container_width=True)
 
-    if st.button("🔍 Predict Threat Level", use_container_width=True):
-        threat   = velocity / miss_dist
-        size_v   = diameter * velocity
-        features = np.array([[magnitude, diameter*0.8, diameter*1.2,
-                              miss_dist, velocity, diameter, threat, size_v]])
+    if predict_btn:
+        threat = velocity / miss_dist
+        size_v = diameter * velocity
+        features = np.array([[magnitude, diameter*0.8, diameter*1.2, miss_dist, velocity, diameter, threat, size_v]])
+        
         pred = model.predict(features)[0]
         prob = model.predict_proba(features)[0][1]
       
-        st.divider()
         if pred == 1:
-            st.error(f"⚠️ HAZARDOUS — {prob*100:.1f}% confidence")
-            st.metric("Threat Score", f"{threat:.2e}", delta="HIGH RISK")
+            st.markdown(f"""
+            <div class="hazard-card">
+                <div class="card-title" style="color: #ff4444;">⚠️ ALERT: CRITICAL HAZARD DETECTED</div>
+                <div style="color: #ff8888; font-size: 1.1rem; font-weight: 600;">AI Interception Confidence: {prob*100:.1f}%</div>
+                <div class="metrics-val" style="color: #ff4444;">{threat:.2e}</div>
+                <div style="color: #a0aec0; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Kinetic Energy Threat Multiplier Score</div>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.success(f"✅ SAFE — {(1-prob)*100:.1f}% confidence")
-            st.metric("Threat Score", f"{threat:.2e}", delta="LOW RISK")
+            st.markdown(f"""
+            <div class="safe-card">
+                <div class="card-title" style="color: #00ff88;">✅ REPORT: SECURE ORBIT TRACKED</div>
+                <div style="color: #88ffcc; font-size: 1.1rem; font-weight: 600;">AI Deflection Certainty: {(1-prob)*100:.1f}%</div>
+                <div class="metrics-val" style="color: #00ff88;">{threat:.2e}</div>
+                <div style="color: #a0aec0; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Calculated Interception Risk Index</div>
+            </div>
+            """, unsafe_allow_html=True)
 
-        # ════════════ LOCAL VISUAL ENGINE CLOSE-APPROACH ════════════
         st.divider()
         st.subheader("🛡️ AstroShield Close-Approach Interface")
         
@@ -244,7 +344,6 @@ with tab2:
         mode='lines', line=dict(color='rgba(0,255,136,0.5)', width=3), name='🛡️ Earth Shield', hoverinfo='none'
     ))
 
-    # Safely rendering active planets
     for name, pos in planet_positions.items():
         fig.add_trace(go.Scatter3d(
             x=[pos['x']], y=[pos['y']], z=[pos['z']], mode='markers+text',
@@ -259,7 +358,7 @@ with tab2:
             text=[f"🛸 {sname.split('—')[0]}"], textfont=dict(color=sp['color'], size=8), textposition='top center', name=sname
         ))
 
-    haz  = ast_df[ast_df['class'] != 'AMO'].head(500) if 'class' in ast_df.columns else ast_df.head(500)
+    haz = ast_df[ast_df['class'] != 'AMO'].head(500) if 'class' in ast_df.columns else ast_df.head(500)
     safe = ast_df.tail(500)
 
     fig.add_trace(go.Scatter3d(
@@ -268,7 +367,6 @@ with tab2:
         hovertemplate='<b>%{customdata}</b><br>Dist: %{x:.2f} AU<extra></extra>', customdata=haz['full_name'] if 'full_name' in haz.columns else haz.index
     ))
 
-    # Fixed safe coordinate columns safety check mapping
     s_x = safe['ast_x']
     s_y = safe['safe_y'] if 'safe_y' in safe.columns else (safe['ast_y'] if 'ast_y' in safe.columns else safe.iloc[:, 1])
     s_z = safe['safe_z'] if 'safe_z' in safe.columns else (safe['ast_z'] if 'ast_z' in safe.columns else safe.iloc[:, 2])
