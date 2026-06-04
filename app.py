@@ -28,6 +28,7 @@ html, body, [data-testid="stAppViewContainer"] {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 30px rgba(0, 242, 254, 0.25);
+    margin-bottom: 0px;
 }
 
 .sub-title {
@@ -46,7 +47,7 @@ div.stButton > button:first-child {
     letter-spacing: 1px !important;
     border: none !important;
     border-radius: 8px !important;
-    padding: 12px 24px !important;
+    padding: 15px 24px !important;
     box-shadow: 0 0 15px rgba(0, 242, 254, 0.4) !important;
     transition: all 0.3s ease-in-out !important;
 }
@@ -57,41 +58,61 @@ div.stButton > button:first-child:hover {
     color: #000000 !important;
 }
 
+.hud-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    box-shadow: inset 0 0 10px rgba(0, 242, 254, 0.05);
+}
+
+.hud-label {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hud-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    color: #00f2fe;
+    font-weight: 700;
+}
+
 .hazard-card {
-    background: linear-gradient(135deg, rgba(255, 68, 68, 0.12) 0%, rgba(15, 3, 3, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(255, 68, 68, 0.15) 0%, rgba(15, 3, 3, 0.95) 100%);
     border: 2px solid #ff4444;
     border-radius: 12px;
-    padding: 25px;
+    padding: 30px;
     text-align: center;
-    box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);
-    margin: 15px 0px;
+    box-shadow: 0 0 30px rgba(255, 68, 68, 0.25);
 }
 
 .safe-card {
-    background: linear-gradient(135deg, rgba(0, 255, 136, 0.12) 0%, rgba(3, 15, 8, 0.9) 100%);
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.15) 0%, rgba(3, 15, 8, 0.95) 100%);
     border: 2px solid #00ff88;
     border-radius: 12px;
-    padding: 25px;
+    padding: 30px;
     text-align: center;
-    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
-    margin: 15px 0px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.25);
 }
 
 .card-title {
     font-family: 'Orbitron', sans-serif;
-    font-size: 1.6rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: 2px;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .metrics-val {
     font-family: 'Orbitron', sans-serif;
-    font-size: 3rem;
+    font-size: 3.5rem;
     font-weight: 900;
-    color: #ffffff;
-    margin: 10px 0px;
-    text-shadow: 0 0 15px rgba(255,255,255,0.3);
+    margin: 15px 0px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.2);
 }
 
 button[data-baseweb="tab"] {
@@ -103,7 +124,7 @@ button[data-baseweb="tab"] {
 """, unsafe_allow_html=True)
 
 st.markdown('<h1 class="main-title">🛸 ASTROSHIELD AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Orbital Forecast Center</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Tactical Forecast Center</p>', unsafe_allow_html=True)
 
 PLANET_METRICS = {
     'Mercury': {'radius': 0.387, 'size': 8,  'color': '#b5b5b5'},
@@ -120,17 +141,10 @@ def get_planet_position(planet_id):
     stop = (today + timedelta(days=1)).strftime('%Y-%m-%d')
     
     params = {
-        'format': 'json',
-        'COMMAND': planet_id,
-        'OBJ_DATA': 'NO',
-        'MAKE_EPHEM': 'YES',
-        'EPHEM_TYPE': 'VECTORS',
-        'CENTER': '500@10',
-        'START_TIME': start,
-        'STOP_TIME': stop,
-        'STEP_SIZE': '1d',
-        'VEC_TABLE': '2',
-        'CSV_FORMAT': 'YES'
+        'format': 'json', 'COMMAND': planet_id, 'OBJ_DATA': 'NO',
+        'MAKE_EPHEM': 'YES', 'EPHEM_TYPE': 'VECTORS', 'CENTER': '500@10',
+        'START_TIME': start, 'STOP_TIME': stop, 'STEP_SIZE': '1d',
+        'VEC_TABLE': '2', 'CSV_FORMAT': 'YES'
     }
     try:
         response = requests.get(url, params=params, timeout=5).json()
@@ -189,99 +203,111 @@ planet_positions = load_cosmic_positions()
 earth_pos = {'x': -0.3182, 'y': 0.9389, 'z': 0.0}
 earth_angle = math.atan2(earth_pos['y'], earth_pos['x'])
 
-tab1, tab2 = st.tabs(["🔍 Predict Threat", "🪐 Solar System"])
+tab1, tab2 = st.tabs(["🔍 Predict Threat Matrix", "🪐 Solar System Grid"])
 
 with tab1:
-    with st.container(border=True):
-        st.markdown("<p style='font-family:\"Orbitron\", sans-serif; font-weight: bold; color: #00f2fe; margin-bottom: 15px;'>🎛️ ORBITAL TELEMETRY PARAMETERS</p>", unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
+    col_l, col_r = st.columns([1.1, 1.9], gap="large")
+    
+    with col_l:
+        st.markdown("<p style='font-family:\"Orbitron\", sans-serif; font-size:0.9rem; font-weight: bold; color: #00f2fe; margin-bottom: 10px;'>🎛️ CONTROL INTERFACE</p>", unsafe_allow_html=True)
+        
+        with st.container(border=True):
             magnitude = st.slider("Absolute Magnitude (H)", 10.0, 35.0, 20.0)
             diameter  = st.slider("Estimated Diameter (km)", 0.001, 10.0, 0.5)
             velocity  = st.slider("Velocity (km/s)", 1.0, 40.0, 15.0)
-        with col2:
             miss_dist = st.number_input("Miss Distance (km)", value=500000.0, step=50000.0)
-            st.markdown("<br><br>", unsafe_allow_html=True)
-            predict_btn = st.button("⚡ EXECUTE NEURAL THREAT ASSESSMENT", use_container_width=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            predict_btn = st.button("⚡ RUN ASSESSMENT", use_container_width=True)
 
-    if predict_btn:
+    with col_r:
+        st.markdown("<p style='font-family:\"Orbitron\", sans-serif; font-size:0.9rem; font-weight: bold; color: #00f2fe; margin-bottom: 10px;'>📊 LIVE TELEMETRY HUD</p>", unsafe_allow_html=True)
+        
+        hud1, hud2, hud3, hud4 = st.columns(4)
+        hud1.markdown(f'<div class="hud-card"><div class="hud-label">Mag (H)</div><div class="hud-value">{magnitude}</div></div>', unsafe_allow_html=True)
+        hud2.markdown(f'<div class="hud-card"><div class="hud-label">Size</div><div class="hud-value">{diameter} km</div></div>', unsafe_allow_html=True)
+        hud3.markdown(f'<div class="hud-card"><div class="hud-label">Velocity</div><div class="hud-value">{velocity} m/s</div></div>', unsafe_allow_html=True)
+        hud4.markdown(f'<div class="hud-card"><div class="hud-label">Miss Dist</div><div class="hud-value">{miss_dist/1e3:.1f}k k</div></div>', unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         threat = velocity / miss_dist
         size_v = diameter * velocity
         features = np.array([[magnitude, diameter*0.8, diameter*1.2, miss_dist, velocity, diameter, threat, size_v]])
         
         pred = model.predict(features)[0]
         prob = model.predict_proba(features)[0][1]
-      
-        if pred == 1:
-            st.markdown(f"""
-            <div class="hazard-card">
-                <div class="card-title" style="color: #ff4444;">⚠️ ALERT: CRITICAL HAZARD DETECTED</div>
-                <div style="color: #ff8888; font-size: 1.1rem; font-weight: 600;">AI Interception Confidence: {prob*100:.1f}%</div>
-                <div class="metrics-val" style="color: #ff4444;">{threat:.2e}</div>
-                <div style="color: #a0aec0; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Kinetic Energy Threat Multiplier Score</div>
-            </div>
-            """, unsafe_allow_html=True)
-        else:
-            st.markdown(f"""
-            <div class="safe-card">
-                <div class="card-title" style="color: #00ff88;">✅ REPORT: SECURE ORBIT TRACKED</div>
-                <div style="color: #88ffcc; font-size: 1.1rem; font-weight: 600;">AI Deflection Certainty: {(1-prob)*100:.1f}%</div>
-                <div class="metrics-val" style="color: #00ff88;">{threat:.2e}</div>
-                <div style="color: #a0aec0; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Calculated Interception Risk Index</div>
-            </div>
-            """, unsafe_allow_html=True)
+        
+        out_col1, out_col2 = st.columns([1.2, 1.8], gap="medium")
+        
+        with out_col1:
+            if predict_btn or True:  
+                if pred == 1:
+                    st.markdown(f"""
+                    <div class="hazard-card">
+                        <div class="card-title" style="color: #ff4444;">⚠️ CRITICAL HAZARD</div>
+                        <div style="color: #ff8888; font-size: 0.9rem; font-weight: 600;">Confidence: {prob*100:.1f}%</div>
+                        <div class="metrics-val" style="color: #ff4444; font-size:2.2rem;">{threat:.2e}</div>
+                        <div style="color: #a0aec0; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;">Threat Index Score</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown(f"""
+                    <div class="safe-card">
+                        <div class="card-title" style="color: #00ff88;">✅ SECURE ORBIT</div>
+                        <div style="color: #88ffcc; font-size: 0.9rem; font-weight: 600;">Certainty: {(1-prob)*100:.1f}%</div>
+                        <div class="metrics-val" style="color: #00ff88; font-size:2.2rem;">{threat:.2e}</div>
+                        <div style="color: #a0aec0; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;">Risk Index Score</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+        
+        with out_col2:
+            plot_dist_scaled = max(0.2, min(1.2, (miss_dist / 1000000.0) * 0.6))
+            ast_size_scaled = max(6, min(24, diameter * 4))
+            theme_color = '#ff4444' if pred == 1 else '#00ff88'
+            shield_line_color = 'rgba(255, 68, 68, 0.8)' if pred == 1 else 'rgba(0, 255, 136, 0.6)'
+            
+            if pred == 1:
+                traj_x = np.linspace(plot_dist_scaled * 1.5, 0.08, 50)
+                traj_y = np.linspace(plot_dist_scaled * 1.5, 0.05, 50)
+                traj_z = np.linspace(0.2, 0.0, 50)
+                ast_x, ast_y, ast_z = plot_dist_scaled * 0.8, plot_dist_scaled * 0.8, 0.1
+            else:
+                traj_x = np.linspace(plot_dist_scaled * 1.5, -plot_dist_scaled, 50)
+                traj_y = np.linspace(plot_dist_scaled * 1.2, plot_dist_scaled * 0.9, 50)
+                traj_z = np.linspace(0.1, 0.1, 50)
+                ast_x, ast_y, ast_z = plot_dist_scaled, plot_dist_scaled, 0.1
 
-        st.divider()
-        st.subheader("🛡️ AstroShield Close-Approach Interface")
-        
-        plot_dist_scaled = max(0.2, min(1.2, (miss_dist / 1000000.0) * 0.6))
-        ast_size_scaled = max(6, min(24, diameter * 4))
-        theme_color = '#ff4444' if pred == 1 else '#00ff88'
-        shield_line_color = 'rgba(255, 68, 68, 0.8)' if pred == 1 else 'rgba(0, 255, 136, 0.6)'
-        
-        if pred == 1:
-            traj_x = np.linspace(plot_dist_scaled * 1.5, 0.08, 50)
-            traj_y = np.linspace(plot_dist_scaled * 1.5, 0.05, 50)
-            traj_z = np.linspace(0.2, 0.0, 50)
-            ast_x, ast_y, ast_z = plot_dist_scaled * 0.8, plot_dist_scaled * 0.8, 0.1
-        else:
-            traj_x = np.linspace(plot_dist_scaled * 1.5, -plot_dist_scaled, 50)
-            traj_y = np.linspace(plot_dist_scaled * 1.2, plot_dist_scaled * 0.9, 50)
-            traj_z = np.linspace(0.1, 0.1, 50)
-            ast_x, ast_y, ast_z = plot_dist_scaled, plot_dist_scaled, 0.1
+            btn_fig = go.Figure()
+            
+            btn_fig.add_trace(go.Scatter3d(
+                x=np.random.uniform(-2, 2, 80), y=np.random.uniform(-2, 2, 80), z=np.random.uniform(-2, 2, 80),
+                mode='markers', marker=dict(size=1, color='white', opacity=0.25), showlegend=False, hoverinfo='none'
+            ))
+            btn_fig.add_trace(go.Scatter3d(
+                x=[0], y=[0], z=[0], mode='markers',
+                marker=dict(size=14, color='#2e86c1', line=dict(color='#85c1e9', width=2)), name='🌍 Earth'
+            ))
+            
+            theta = np.linspace(0, 2*np.pi, 100)
+            btn_fig.add_trace(go.Scatter3d(
+                x=0.15*np.cos(theta), y=0.15*np.sin(theta), z=np.zeros(100),
+                mode='lines', line=dict(color=shield_line_color, width=2), name='🛡️ Shield Deflection Deflector'
+            ))
+            btn_fig.add_trace(go.Scatter3d(
+                x=[ast_x], y=[ast_y], z=[ast_z], mode='markers',
+                marker=dict(size=ast_size_scaled, color=theme_color, line=dict(color='white', width=1)), name='☄️ Asteroid'
+            ))
+            btn_fig.add_trace(go.Scatter3d(
+                x=traj_x, y=traj_y, z=traj_z, mode='lines',
+                line=dict(color='rgba(255,255,255,0.2)', width=2, dash='longdash'), name='Trajectory Vector', hoverinfo='none'
+            ))
 
-        btn_fig = go.Figure()
-        
-        btn_fig.add_trace(go.Scatter3d(
-            x=np.random.uniform(-2, 2, 100), y=np.random.uniform(-2, 2, 100), z=np.random.uniform(-2, 2, 100),
-            mode='markers', marker=dict(size=1, color='white', opacity=0.3), showlegend=False, hoverinfo='none'
-        ))
-        btn_fig.add_trace(go.Scatter3d(
-            x=[0], y=[0], z=[0], mode='markers+text',
-            marker=dict(size=15, color='#2e86c1', line=dict(color='#85c1e9', width=2)),
-            text=['🌍 Earth'], textfont=dict(color='#85c1e9', size=11), textposition='top center', name='🌍 Earth'
-        ))
-        
-        theta = np.linspace(0, 2*np.pi, 100)
-        btn_fig.add_trace(go.Scatter3d(
-            x=0.15*np.cos(theta), y=0.15*np.sin(theta), z=np.zeros(100),
-            mode='lines', line=dict(color=shield_line_color, width=3 if pred==1 else 2), name='🛡️ Shield Vector'
-        ))
-        btn_fig.add_trace(go.Scatter3d(
-            x=[ast_x], y=[ast_y], z=[ast_z], mode='markers+text',
-            marker=dict(size=ast_size_scaled, color=theme_color, line=dict(color='white', width=1)),
-            text=[f"☄️ Asteroid Track (V: {velocity} km/s)"], textfont=dict(color='white', size=10), textposition='top center', name='Target Asteroid'
-        ))
-        btn_fig.add_trace(go.Scatter3d(
-            x=traj_x, y=traj_y, z=traj_z, mode='lines',
-            line=dict(color='rgba(255,255,255,0.25)', width=2, dash='longdash'), name='Predicted Path Matrix', hoverinfo='none'
-        ))
-
-        btn_fig.update_layout(
-            paper_bgcolor='#00000f', scene=dict(bgcolor='#00000f', xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), aspectmode='data'),
-            margin=dict(l=0, r=0, t=10, b=0), height=500, showlegend=True, legend=dict(font=dict(color='white', size=9), bgcolor='rgba(0,0,20,0.85)')
-        )
-        st.plotly_chart(btn_fig, use_container_width=True)
+            btn_fig.update_layout(
+                paper_bgcolor='#03030c', scene=dict(bgcolor='#03030c', xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), aspectmode='data'),
+                margin=dict(l=0, r=0, t=0, b=0), height=280, showlegend=True, legend=dict(font=dict(color='white', size=8), bgcolor='rgba(0,0,20,0.6)', x=0.01, y=0.99)
+            )
+            st.plotly_chart(btn_fig, use_container_width=True)
 
 with tab2:
     st.caption("Live Feed Status: Connected to JPL Horizons.")
