@@ -2,7 +2,7 @@ import streamlit as st
 import pickle
 import numpy as np
 
-model = pickle.load(open('asteroid_model.pkl', 'rb'))
+model = pickle.load(open('asteroidmodel.pkl', 'rb'))
 
 st.set_page_config(page_title="AstroShield AI", page_icon="🛸", layout="wide")
 
