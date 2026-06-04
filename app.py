@@ -5,6 +5,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import math
 
+# Load trained ML Model
 model = pickle.load(open('asteroidmodel.pkl', 'rb'))
 
 st.set_page_config(page_title="AstroShield AI", page_icon="🛸", layout="wide")
@@ -22,7 +23,6 @@ with tab1:
     with col2:
         miss_dist = st.number_input("Miss Distance (km)", value=500000.0)
 
-    # Indentation Fixed Here 👇
     if st.button("🔍 Predict Threat Level", use_container_width=True):
         threat   = velocity / miss_dist
         size_v   = diameter * velocity
@@ -39,8 +39,108 @@ with tab1:
             st.success(f"✅ SAFE — {(1-prob)*100:.1f}% confidence")
             st.metric("Threat Score", f"{threat:.2e}", delta="LOW RISK")
 
+        # ════════════ DYNAMIC TARGET SIMULATION ENGINE ════════════
         st.divider()
-        st.info("👇Go to 'Solar System' tab — see asteroid real position !")
+        st.subheader("🛡️ AstroShield Close-Approach Interface")
+        st.caption("Live mathematical trajectory projection focusing on Earth Defense Vector.")
+
+        # Scaling data for an intuitive local 3D view
+        plot_dist_scaled = max(0.2, min(1.2, (miss_dist / 1000000.0) * 0.6))
+        ast_size_scaled = max(6, min(24, diameter * 4))
+        
+        theme_color = '#ff4444' if pred == 1 else '#00ff88'
+        shield_line_color = 'rgba(255, 68, 68, 0.8)' if pred == 1 else 'rgba(0, 255, 136, 0.6)'
+        
+        # Plotly logic mapping for target intercepts
+        if pred == 1:
+            traj_x = np.linspace(plot_dist_scaled * 1.5, 0.08, 50)
+            traj_y = np.linspace(plot_dist_scaled * 1.5, 0.05, 50)
+            traj_z = np.linspace(0.2, 0.0, 50)
+            ast_x, ast_y, ast_z = plot_dist_scaled * 0.8, plot_dist_scaled * 0.8, 0.1
+        else:
+            traj_x = np.linspace(plot_dist_scaled * 1.5, -plot_dist_scaled, 50)
+            traj_y = np.linspace(plot_dist_scaled * 1.2, plot_dist_scaled * 0.9, 50)
+            traj_z = np.linspace(0.1, 0.1, 50)
+            ast_x, ast_y, ast_z = plot_dist_scaled, plot_dist_scaled, 0.1
+
+        btn_fig = go.Figure()
+
+        # Stars Field Background
+        btn_fig.add_trace(go.Scatter3d(
+            x=np.random.uniform(-2, 2, 150), y=np.random.uniform(-2, 2, 150), z=np.random.uniform(-2, 2, 150),
+            mode='markers', marker=dict(size=1, color='white', opacity=0.3),
+            showlegend=False, hoverinfo='none'
+        ))
+
+        # Earth Center Node
+        btn_fig.add_trace(go.Scatter3d(
+            x=[0], y=[0], z=[0],
+            mode='markers+text',
+            marker=dict(size=15, color='#2e86c1', line=dict(color='#85c1e9', width=2)),
+            text=['🌍 Earth'], textfont=dict(color='#85c1e9', size=11),
+            textposition='top center', name='🌍 Earth (HQ)'
+        ))
+
+        # Atmospheric Dynamic Defense Shield Radius
+        theta = np.linspace(0, 2*np.pi, 100)
+        btn_fig.add_trace(go.Scatter3d(
+            x=0.15*np.cos(theta), y=0.15*np.sin(theta), z=np.zeros(100),
+            mode='lines', line=dict(color=shield_line_color, width=3 if pred==1 else 2, dash='dash' if pred==1 else 'solid'),
+            name='🛡️ Atmospheric Shield Boundary'
+        ))
+
+        # Near Earth Orbital Support Infrastructure 
+        l4_x, l4_y = 0.4 * math.cos(math.radians(60)), 0.4 * math.sin(math.radians(60))
+        btn_fig.add_trace(go.Scatter3d(
+            x=[l4_x], y=[l4_y], z=[0],
+            mode='markers+text',
+            marker=dict(size=9, color='#00ffff', symbol='diamond', line=dict(color='white', width=1)),
+            text=['🛸 L4 Human Colony'], textfont=dict(color='#00ffff', size=9),
+            textposition='bottom center', name='🛸 L4 Tactical Colony'
+        ))
+
+        # Energy Distribution Path Lines
+        btn_fig.add_trace(go.Scatter3d(
+            x=[0.5*math.cos(theta[35]), 0], y=[0.5*math.sin(theta[35]), 0], z=[0, 0],
+            mode='lines', line=dict(color='rgba(255, 215, 0, 0.4)', width=2, dash='dot'),
+            name='⚡ Wireless Microwave Beam'
+        ))
+
+        # The Target Asteroid Marker
+        btn_fig.add_trace(go.Scatter3d(
+            x=[ast_x], y=[ast_y], z=[ast_z],
+            mode='markers+text',
+            marker=dict(size=ast_size_scaled, color=theme_color, line=dict(color='white', width=1)),
+            text=[f"☄️ Asteroid Input Map (V: {velocity} km/s)"], textfont=dict(color='white', size=10),
+            textposition='top center', name='Evaluated Target'
+        ))
+
+        # Interception/Pass Path Trace
+        btn_fig.add_trace(go.Scatter3d(
+            x=traj_x, y=traj_y, z=traj_z,
+            mode='lines', line=dict(color='rgba(255,255,255,0.25)', width=2, dash='longdash'),
+            name='Vector Track Profile', hoverinfo='none'
+        ))
+
+        btn_fig.update_layout(
+            paper_bgcolor='#00000f',
+            scene=dict(
+                bgcolor='#00000f',
+                xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, showbackground=False),
+                yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, showbackground=False),
+                zaxis=dict(showgrid=False, zeroline=False, showticklabels=False, showbackground=False),
+                camera=dict(eye=dict(x=1.1, y=1.1, z=0.6)),
+                aspectmode='data'
+            ),
+            margin=dict(l=0, r=0, t=10, b=0),
+            height=500,
+            showlegend=True,
+            legend=dict(font=dict(color='white', size=9), bgcolor='rgba(0,0,20,0.85)', x=0.01, y=0.99)
+        )
+        st.plotly_chart(btn_fig, use_container_width=True)
+        # ══════════════════════════════════════════════════════════
+
+        st.info("🪐 Pure solar system space dynamics aur baki planets ko explore karne ke liye upar 'Solar System' tab par jaao!")
 
 with tab2:
     st.caption("Real JPL Horizons planet positions + SBDB Keplerian asteroid orbits")
@@ -76,16 +176,16 @@ with tab2:
         showlegend=False, hoverinfo='none'
     ))
 
-    theta = np.linspace(0, 2*np.pi, 300)
+    theta_sys = np.linspace(0, 2*np.pi, 300)
     for planet, data in planet_positions.items():
         r = data['radius']
         fig.add_trace(go.Scatter3d(
-            x=r*np.cos(theta), y=r*np.sin(theta), z=np.zeros(300),
+            x=r*np.cos(theta_sys), y=r*np.sin(theta_sys), z=np.zeros(300),
             mode='lines', line=dict(color='rgba(255,255,255,0.18)', width=1),
             showlegend=False, hoverinfo='none'
         ))
     fig.add_trace(go.Scatter3d(
-        x=1.0*np.cos(theta), y=1.0*np.sin(theta), z=np.zeros(300),
+        x=1.0*np.cos(theta_sys), y=1.0*np.sin(theta_sys), z=np.zeros(300),
         mode='lines', line=dict(color='rgba(255,255,255,0.18)', width=1),
         showlegend=False, hoverinfo='none'
     ))
@@ -100,7 +200,7 @@ with tab2:
 
     for dr in [0.18, 0.22, 0.26]:
         fig.add_trace(go.Scatter3d(
-            x=dr*np.cos(theta), y=dr*np.sin(theta), z=np.zeros(300),
+            x=dr*np.cos(theta_sys), y=dr*np.sin(theta_sys), z=np.zeros(300),
             mode='lines', line=dict(color='rgba(255,215,0,0.6)', width=2),
             showlegend=dr==0.18, name='🔆 Dyson Ring', hoverinfo='none'
         ))
@@ -115,8 +215,8 @@ with tab2:
 
     shield_r = 0.05
     fig.add_trace(go.Scatter3d(
-        x=earth_pos['x'] + shield_r*np.cos(theta),
-        y=earth_pos['y'] + shield_r*np.sin(theta),
+        x=earth_pos['x'] + shield_r*np.cos(theta_sys),
+        y=earth_pos['y'] + shield_r*np.sin(theta_sys),
         z=np.zeros(300),
         mode='lines', line=dict(color='rgba(0,255,136,0.5)', width=3),
         name='🛡️ Earth Shield', hoverinfo='none'
