@@ -291,7 +291,7 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("Data Architecture: NASA NeoWs | JPL Horizons API REST System | NASA POWER | NOAA SWPC")        'MAKE_EPHEM': 'YES',
+st.caption("Data Architecture: NASA NeoWs | JPL Horizons API REST System | NASA POWER | NOAA SWPC")
         'EPHEM_TYPE': 'VECTORS',
         'CENTER': '500@10',  # Sun-centered
         'START_TIME': start,
