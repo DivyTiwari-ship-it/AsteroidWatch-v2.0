@@ -161,7 +161,7 @@ button[data-baseweb="tab"] {
 
 st.markdown('<h1 class="main-title">🛸 ASTROSHIELD AI</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Tactical Forecast Center</p>', unsafe_allow_html=True)
-st.markdown('<div class="dev-badge">⚡ DEVELOPER: DIVYANSH TIWARI | SYSTEMS ARCHITECT</div>', unsafe_allow_html=True)
+st.markdown('<div class="dev-badge">⚡ DEVELOPER: DIVYANSH TIWARI | AI & PREDICTIVE ANALYTICS ENGINEER</div>', unsafe_allow_html=True)
 
 PLANET_METRICS = {
     'Mercury': {'radius': 0.387, 'size': 8,  'color': '#b5b5b5'},
