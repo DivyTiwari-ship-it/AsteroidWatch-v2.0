@@ -357,7 +357,7 @@ with tab1:
                 ))
                 feat_fig.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                    margin=dict(l=10, r=10, t=10, b=10), height=160,
+                    margin=dict(l=10, r=10, t=10, b=10), height=250, # Updated for better spacing
                     xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#7f8c8d', size=9)),
                     yaxis=dict(tickfont=dict(color='#e2e8f0', size=9, family='Orbitron'))
                 )
