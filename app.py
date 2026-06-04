@@ -22,29 +22,25 @@ with tab1:
     with col2:
         miss_dist = st.number_input("Miss Distance (km)", value=500000.0)
 
-   if st.button("🔍 Predict Threat Level", use_container_width=True):
-      threat   = velocity / miss_dist
-      size_v   = diameter * velocity
-      features = np.array([[magnitude, diameter*0.8, diameter*1.2,
-                          miss_dist, velocity, diameter, threat, size_v]])
-      pred = model.predict(features)[0]
-      prob = model.predict_proba(features)[0][1]
-    
-     st.divider()
-     if pred == 1:
-         st.error(f"⚠️ HAZARDOUS — {prob*100:.1f}% confidence")
-         st.metric("Threat Score", f"{threat:.2e}", delta="HIGH RISK")
-     else:
-         st.success(f"✅ SAFE — {(1-prob)*100:.1f}% confidence")
-         st.metric("Threat Score", f"{threat:.2e}", delta="LOW RISK")
-
-     st.divider()
-     st.info("👇Go to 'Solar System' tab — see asteroid real position !")
-       
+    # Indentation Fixed Here 👇
+    if st.button("🔍 Predict Threat Level", use_container_width=True):
+        threat   = velocity / miss_dist
+        size_v   = diameter * velocity
+        features = np.array([[magnitude, diameter*0.8, diameter*1.2,
+                              miss_dist, velocity, diameter, threat, size_v]])
+        pred = model.predict(features)[0]
+        prob = model.predict_proba(features)[0][1]
+      
+        st.divider()
         if pred == 1:
             st.error(f"⚠️ HAZARDOUS — {prob*100:.1f}% confidence")
+            st.metric("Threat Score", f"{threat:.2e}", delta="HIGH RISK")
         else:
             st.success(f"✅ SAFE — {(1-prob)*100:.1f}% confidence")
+            st.metric("Threat Score", f"{threat:.2e}", delta="LOW RISK")
+
+        st.divider()
+        st.info("👇Go to 'Solar System' tab — see asteroid real position !")
 
 with tab2:
     st.caption("Real JPL Horizons planet positions + SBDB Keplerian asteroid orbits")
