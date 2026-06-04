@@ -35,8 +35,22 @@ html, body, [data-testid="stAppViewContainer"] {
     color: #7f8c8d !important;
     font-size: 1.05rem !important;
     letter-spacing: 2px;
-    margin-bottom: 2rem;
+    margin-bottom: 0.8rem;
     text-transform: uppercase;
+}
+
+.dev-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.85rem;
+    color: #00f2fe;
+    letter-spacing: 1px;
+    margin-bottom: 2.5rem;
+    background: rgba(0, 242, 254, 0.05);
+    border: 1px solid rgba(0, 242, 254, 0.2);
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.1);
 }
 
 div.stButton > button:first-child {
@@ -147,6 +161,7 @@ button[data-baseweb="tab"] {
 
 st.markdown('<h1 class="main-title">🛸 ASTROSHIELD AI</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Tactical Forecast Center</p>', unsafe_allow_html=True)
+st.markdown('<div class="dev-badge">⚡ DEVELOPER: DIVYANSH TIWARI | SYSTEMS ARCHITECT</div>', unsafe_allow_html=True)
 
 PLANET_METRICS = {
     'Mercury': {'radius': 0.387, 'size': 8,  'color': '#b5b5b5'},
@@ -357,7 +372,7 @@ with tab1:
                 ))
                 feat_fig.update_layout(
                     paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                    margin=dict(l=10, r=10, t=10, b=10), height=250, # Updated for better spacing
+                    margin=dict(l=10, r=10, t=10, b=10), height=250,
                     xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#7f8c8d', size=9)),
                     yaxis=dict(tickfont=dict(color='#e2e8f0', size=9, family='Orbitron'))
                 )
