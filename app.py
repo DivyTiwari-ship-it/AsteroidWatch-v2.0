@@ -1,4 +1,4 @@
-import streamlit as str
+import streamlit as st
 import pickle
 import numpy as np
 import pandas as pd
@@ -28,8 +28,6 @@ html, body, [data-testid="stAppViewContainer"] {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 0 30px rgba(0, 242, 254, 0.25);
-    margin-bottom: 0px;
-    padding-bottom: 0px;
 }
 
 .sub-title {
@@ -105,7 +103,7 @@ button[data-baseweb="tab"] {
 """, unsafe_allow_html=True)
 
 st.markdown('<h1 class="main-title">🛸 ASTROSHIELD AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Orbital Forecast Center | NASA Data System</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Orbital Forecast Center</p>', unsafe_allow_html=True)
 
 PLANET_METRICS = {
     'Mercury': {'radius': 0.387, 'size': 8,  'color': '#b5b5b5'},
@@ -178,7 +176,7 @@ def load_cosmic_positions():
         raw_data = get_planet_position(pid)
         pos = parse_xyz(raw_data)
         if not pos:
-            pos = fallbacks[name]
+            pos = fallbacks[name].copy()
         
         pos['radius'] = PLANET_METRICS[name]['radius']
         pos['size'] = PLANET_METRICS[name]['size']
@@ -284,21 +282,20 @@ with tab1:
             margin=dict(l=0, r=0, t=10, b=0), height=500, showlegend=True, legend=dict(font=dict(color='white', size=9), bgcolor='rgba(0,0,20,0.85)')
         )
         st.plotly_chart(btn_fig, use_container_width=True)
-        st.info("🪐 To explore real-time solar system dynamics and planetary orbits, switch to the 'Solar System' tab above!")
 
 with tab2:
-    st.caption("Live Feed Status: Connected directly to JPL Horizons Barycentric Ephemeris Service via REST vectors.")
+    st.caption("Live Feed Status: Connected to JPL Horizons.")
 
     ast_df = pd.read_csv('asteroid_positions.csv')
 
     station_config = {
-        'Mercury L1 — Solar Harvester': {'x': planet_positions['Mercury']['x'] * 0.85, 'y': planet_positions['Mercury']['y'] * 0.85, 'z': 0, 'color': '#FFD700'},
-        'Venus L2 — Research Post':     {'x': planet_positions['Venus']['x'] * 1.15,   'y': planet_positions['Venus']['y'] * 1.15,   'z': 0, 'color': '#FFA07A'},
-        'Earth L4 — Human Colony':      {'x': 1.0 * math.cos(earth_angle + math.radians(60)), 'y': 1.0 * math.sin(earth_angle + math.radians(60)), 'z': 0, 'color': '#00FFFF'},
-        'Earth L5 — Industrial':        {'x': 1.0 * math.cos(earth_angle - math.radians(60)), 'y': 1.0 * math.sin(earth_angle - math.radians(60)), 'z': 0, 'color': '#FF00FF'},
-        'Mars Phobos — Mining Base':    {'x': planet_positions['Mars']['x'] * 1.02,    'y': planet_positions['Mars']['y'] * 1.02,    'z': 0.01, 'color': '#FF6600'},
-        'Jupiter L4 — Trojan Outpost':  {'x': 5.203 * math.cos(math.atan2(planet_positions['Jupiter']['y'], planet_positions['Jupiter']['x']) + math.radians(60)), 'y': 5.203 * math.sin(math.atan2(planet_positions['Jupiter']['y'], planet_positions['Jupiter']['x']) + math.radians(60)), 'z': 0, 'color': '#98FB98'},
-        'Titan Orbit — Outer Frontier': {'x': planet_positions['Saturn']['x'] * 1.008, 'y': planet_positions['Saturn']['y'] * 1.008, 'z': 0.05, 'color': '#DDA0DD'},
+        'Mercury L1': {'x': planet_positions['Mercury']['x'] * 0.85, 'y': planet_positions['Mercury']['y'] * 0.85, 'z': 0, 'color': '#FFD700'},
+        'Venus L2':   {'x': planet_positions['Venus']['x'] * 1.15,   'y': planet_positions['Venus']['y'] * 1.15,   'z': 0, 'color': '#FFA07A'},
+        'Earth L4':   {'x': 1.0 * math.cos(earth_angle + math.radians(60)), 'y': 1.0 * math.sin(earth_angle + math.radians(60)), 'z': 0, 'color': '#00FFFF'},
+        'Earth L5':   {'x': 1.0 * math.cos(earth_angle - math.radians(60)), 'y': 1.0 * math.sin(earth_angle - math.radians(60)), 'z': 0, 'color': '#FF00FF'},
+        'Mars Phobos': {'x': planet_positions['Mars']['x'] * 1.02,    'y': planet_positions['Mars']['y'] * 1.02,    'z': 0.01, 'color': '#FF6600'},
+        'Jupiter L4': {'x': 5.203 * math.cos(math.atan2(planet_positions['Jupiter']['y'], planet_positions['Jupiter']['x']) + math.radians(60)), 'y': 5.203 * math.sin(math.atan2(planet_positions['Jupiter']['y'], planet_positions['Jupiter']['x']) + math.radians(60)), 'z': 0, 'color': '#98FB98'},
+        'Titan Orbit': {'x': planet_positions['Saturn']['x'] * 1.008, 'y': planet_positions['Saturn']['y'] * 1.008, 'z': 0.05, 'color': '#DDA0DD'},
     }
 
     fig = go.Figure()
@@ -355,7 +352,7 @@ with tab2:
         fig.add_trace(go.Scatter3d(
             x=[sp['x']], y=[sp['y']], z=[sp['z']], mode='markers+text',
             marker=dict(size=8, color=sp['color'], symbol='diamond', line=dict(color='white', width=1)),
-            text=[f"🛸 {sname.split('—')[0]}"], textfont=dict(color=sp['color'], size=8), textposition='top center', name=sname
+            text=[f"🛸 {sname}"], textfont=dict(color=sp['color'], size=8), textposition='top center', name=sname
         ))
 
     haz = ast_df[ast_df['class'] != 'AMO'].head(500) if 'class' in ast_df.columns else ast_df.head(500)
@@ -389,4 +386,4 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
-st.caption("Data Architecture: NASA NeoWs | JPL Horizons API REST System | NASA POWER | NOAA SWPC")
+st.caption("Data Architecture: NASA NeoWs | JPL Horizons API REST System")
