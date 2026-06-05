@@ -7,10 +7,12 @@ import math
 import requests
 from datetime import datetime, timedelta, timezone
 
+# --- MODEL LOAD & CONFIG ---
 model = pickle.load(open('asteroidmodel.pkl', 'rb'))
 
 st.set_page_config(page_title="AstroShield AI", page_icon="🛸", layout="wide")
 
+# --- CSS STYLES ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap');
@@ -159,10 +161,12 @@ button[data-baseweb="tab"] {
 </style>
 """, unsafe_allow_html=True)
 
+# --- HEADER DISPLAY ---
 st.markdown('<h1 class="main-title">🛸 ASTROSHIELD AI</h1>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">🤖 Deep Space Threat Monitor & Tactical Forecast Center</p>', unsafe_allow_html=True)
 st.markdown('<div class="dev-badge">⚡ DEVELOPER: DIVYANSH TIWARI | AI & PREDICTIVE ANALYTICS ENGINEER</div>', unsafe_allow_html=True)
 
+# --- CONFIG DATA FOR PLANETS ---
 PLANET_METRICS = {
     'Mercury': {'radius': 0.387, 'size': 8,  'color': '#b5b5b5'},
     'Venus':   {'radius': 0.723, 'size': 8,  'color': '#e8cda0'},
@@ -171,6 +175,7 @@ PLANET_METRICS = {
     'Saturn':  {'radius': 9.537, 'size': 15, 'color': '#e4d191'},
 }
 
+# --- HELPER FUNCTIONS ---
 def get_planet_position(planet_id):
     url = "https://ssd.jpl.nasa.gov/api/horizons.api"
     today = datetime.now(timezone.utc)
@@ -236,12 +241,15 @@ def load_cosmic_positions():
         
     return positions
 
+# --- DATA SHIELD OPERATIONS ---
 planet_positions = load_cosmic_positions()
 earth_pos = {'x': -0.3182, 'y': 0.9389, 'z': 0.0}
 earth_angle = math.atan2(earth_pos['y'], earth_pos['x'])
 
+# --- APP TABS INTERFACE ---
 tab1, tab2 = st.tabs(["🔍 Predict Threat Matrix", "🪐 Solar System Grid"])
 
+# ==================== WITH TAB 1: THREAT RADAR INTERCEPT ====================
 with tab1:
     st.markdown("<p style='font-family:\"Orbitron\"; color: #00f2fe; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 5px;'>🛰️ DEEP SPACE STATION TELEMETRY</p>", unsafe_allow_html=True)
     
@@ -279,19 +287,24 @@ with tab1:
                 st.markdown('<div class="safe-card"><div style="font-size:1.1rem; font-weight:bold; color:#00ff88; letter-spacing:1px;">✅ SAFE ZONE</div><div style="font-size:1.8rem; font-family:\'Orbitron\'; color:#00ff88;">STABLE ORBIT</div><p style="font-size:0.8rem; color:#e2e8f0; margin-top:10px;">Trajectory is safe. Planetary defense shields require no intercept protocols.</p></div>', unsafe_allow_html=True)
         
         with out2:
-            fig = go.Figure()
-            fig.add_trace(go.Scatter3d(x=[0], y=[0], z=[0], mode='markers+text', marker=dict(size=14, color='#2e86c1'), text=['Earth'], name='Earth'))
-            fig.add_trace(go.Scatter3d(x=[0.1], y=[0.1], z=[0.05], mode='markers+text', marker=dict(size=6, color='#00ff88', symbol='diamond'), text=['ISS Station'], name='Space Station'))
+            fig_tab1 = go.Figure()
+            fig_tab1.add_trace(go.Scatter3d(x=[0], y=[0], z=[0], mode='markers+text', marker=dict(size=14, color='#2e86c1'), text=['Earth'], name='Earth'))
+            fig_tab1.add_trace(go.Scatter3d(x=[0.1], y=[0.1], z=[0.05], mode='markers+text', marker=dict(size=6, color='#00ff88', symbol='diamond'), text=['ISS Station'], name='Space Station'))
             
             ast_color = '#ff4444' if pred == 1 else '#00ff88'
-            fig.add_trace(go.Scatter3d(x=[0.4], y=[0.5], z=[0.2], mode='markers+text', marker=dict(size=9, color=ast_color), text=['Target Asteroid'], name='Asteroid'))
-            fig.add_trace(go.Scatter3d(x=[0.8, 0.4, 0], y=[0.9, 0.5, 0], z=[0.4, 0.2, 0], mode='lines', line=dict(color='rgba(255,255,255,0.2)', width=2, dash='dash'), name='Trajectory Path'))
+            fig_tab1.add_trace(go.Scatter3d(x=[0.4], y=[0.5], z=[0.2], mode='markers+text', marker=dict(size=9, color=ast_color), text=['Target Asteroid'], name='Asteroid'))
+            fig_tab1.add_trace(go.Scatter3d(x=[0.8, 0.4, 0], y=[0.9, 0.5, 0], z=[0.4, 0.2, 0], mode='lines', line=dict(color='rgba(255,255,255,0.2)', width=2, dash='dash'), name='Trajectory Path'))
             
-            fig.update_layout(
+            fig_tab1.update_layout(
                 paper_bgcolor='rgba(0,0,0,0)', 
                 plot_bgcolor='rgba(0,0,0,0)',
                 scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False)), 
-                margin=dict(l=0,r=0,t
+                margin=dict(l=0, r=0, t=0, b=0),
+                height=260
+            )
+            st.plotly_chart(fig_tab1, use_container_width=True)
+
+# ==================== WITH TAB 2: SYSTEM MONITOR GRID ====================
 with tab2:
     st.caption("Live Feed Status: Connected to JPL Horizons.")
 
@@ -394,5 +407,6 @@ with tab2:
     )
     st.plotly_chart(fig, use_container_width=True)
 
+# --- FOOTER ---
 st.divider()
 st.caption("Data Architecture: NASA NeoWs | JPL Horizons API REST System")
