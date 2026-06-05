@@ -243,141 +243,55 @@ earth_angle = math.atan2(earth_pos['y'], earth_pos['x'])
 tab1, tab2 = st.tabs(["🔍 Predict Threat Matrix", "🪐 Solar System Grid"])
 
 with tab1:
+    st.markdown("<p style='font-family:\"Orbitron\"; color: #00f2fe; font-size: 1.2rem; letter-spacing: 2px; margin-bottom: 5px;'>🛰️ DEEP SPACE STATION TELEMETRY</p>", unsafe_allow_html=True)
+    
+    s1, s2, s3, s4 = st.columns(4)
+    s1.markdown('<div class="hud-card"><div class="hud-label">ISS (Earth Orbit)</div><div class="hud-value" style="color:#00ff88;">ONLINE (Stable)</div><div style="font-size:0.75rem; color:#7f8c8d;">Alt: 420km</div></div>', unsafe_allow_html=True)
+    s2.markdown('<div class="hud-card"><div class="hud-label">Ares Alpha (Mars)</div><div class="hud-value" style="color:#00ff88;">ONLINE (Active)</div><div style="font-size:0.75rem; color:#7f8c8d;">Dist: 1.52 AU</div></div>', unsafe_allow_html=True)
+    s3.markdown('<div class="hud-card"><div class="hud-label">Hermes Hub (Venus)</div><div class="hud-value" style="color:#f1c40f;">MAINTENANCE</div><div style="font-size:0.75rem; color:#7f8c8d;">Dist: 0.72 AU</div></div>', unsafe_allow_html=True)
+    s4.markdown('<div class="hud-card"><div class="hud-label">Chronos V (Saturn)</div><div class="hud-value" style="color:#ff4444;">ALERT (Solar Flare)</div><div style="font-size:0.75rem; color:#7f8c8d;">Dist: 9.54 AU</div></div>', unsafe_allow_html=True)
+
+    st.markdown("<br><hr style='border-color: rgba(0, 242, 254, 0.1);'>", unsafe_allow_html=True)
+
     col_l, col_r = st.columns([1.1, 1.9], gap="large")
     
     with col_l:
-        st.markdown("<p style='font-family:\"Orbitron\", sans-serif; font-size:0.9rem; font-weight: bold; color: #00f2fe; margin-bottom: 10px;'>🎛️ CONTROL INTERFACE</p>", unsafe_allow_html=True)
-        
+        st.markdown("<p style='font-family:\"Orbitron\"; color: #00f2fe; font-size: 1rem;'>🎛️ ORBITAL PARAMETERS</p>", unsafe_allow_html=True)
         with st.container(border=True):
             magnitude = st.slider("Absolute Magnitude (H)", 10.0, 35.0, 20.0)
-            diameter  = st.slider("Estimated Diameter (km)", 0.001, 10.0, 0.5)
+            diameter  = st.slider("Diameter (km)", 0.001, 10.0, 0.5)
             velocity  = st.slider("Velocity (km/s)", 1.0, 40.0, 15.0)
             miss_dist = st.number_input("Miss Distance (km)", value=500000.0, step=50000.0)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            predict_btn = st.button("⚡ RUN ASSESSMENT", use_container_width=True)
+            predict_btn = st.button("⚡ EXECUTE TRACKING", use_container_width=True)
 
     with col_r:
-        st.markdown("<p style='font-family:\"Orbitron\", sans-serif; font-size:0.9rem; font-weight: bold; color: #00f2fe; margin-bottom: 10px;'>📊 LIVE TELEMETRY HUD</p>", unsafe_allow_html=True)
-        
-        hud1, hud2, hud3, hud4 = st.columns(4)
-        hud1.markdown(f'<div class="hud-card"><div class="hud-label">Mag (H)</div><div class="hud-value">{magnitude}</div></div>', unsafe_allow_html=True)
-        hud2.markdown(f'<div class="hud-card"><div class="hud-label">Size</div><div class="hud-value">{diameter} km</div></div>', unsafe_allow_html=True)
-        hud3.markdown(f'<div class="hud-card"><div class="hud-label">Velocity</div><div class="hud-value">{velocity} m/s</div></div>', unsafe_allow_html=True)
-        hud4.markdown(f'<div class="hud-card"><div class="hud-label">Miss Dist</div><div class="hud-value">{miss_dist/1e3:.1f}k k</div></div>', unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("<p style='font-family:\"Orbitron\"; color: #00f2fe; font-size: 1rem;'>📊 THREAT ASSESSMENT INTERCEPT</p>", unsafe_allow_html=True)
         
         threat = velocity / miss_dist
-        size_v = diameter * velocity
-        features = np.array([[magnitude, diameter*0.8, diameter*1.2, miss_dist, velocity, diameter, threat, size_v]])
-        
+        features = np.array([[magnitude, diameter*0.8, diameter*1.2, miss_dist, velocity, diameter, threat, diameter*velocity]])
         pred = model.predict(features)[0]
-        prob = model.predict_proba(features)[0][1]
         
-        out_col1, out_col2 = st.columns([1.2, 1.8], gap="medium")
-        
-        with out_col1:
-            if predict_btn or True:  
-                if pred == 1:
-                    st.markdown(f"""
-                    <div class="hazard-card">
-                        <div class="card-title" style="color: #ff4444;">⚠️ CRITICAL HAZARD</div>
-                        <div style="color: #ff8888; font-size: 0.9rem; font-weight: 600;">Confidence: {prob*100:.1f}%</div>
-                        <div class="metrics-val" style="color: #ff4444; font-size:2.2rem;">{threat:.2e}</div>
-                        <div style="color: #a0aec0; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;">Threat Index Score</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class="safe-card">
-                        <div class="card-title" style="color: #00ff88;">✅ SECURE ORBIT</div>
-                        <div style="color: #88ffcc; font-size: 0.9rem; font-weight: 600;">Certainty: {(1-prob)*100:.1f}%</div>
-                        <div class="metrics-val" style="color: #00ff88; font-size:2.2rem;">{threat:.2e}</div>
-                        <div style="color: #a0aec0; font-size: 0.7rem; letter-spacing: 1px; text-transform: uppercase;">Risk Index Score</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-        
-        with out_col2:
-            plot_dist_scaled = max(0.2, min(1.2, (miss_dist / 1000000.0) * 0.6))
-            ast_size_scaled = max(6, min(24, diameter * 4))
-            theme_color = '#ff4444' if pred == 1 else '#00ff88'
-            shield_line_color = 'rgba(255, 68, 68, 0.8)' if pred == 1 else 'rgba(0, 255, 136, 0.6)'
-            
+        out1, out2 = st.columns([1.2, 1.8])
+        with out1:
             if pred == 1:
-                traj_x = np.linspace(plot_dist_scaled * 1.5, 0.08, 50)
-                traj_y = np.linspace(plot_dist_scaled * 1.5, 0.05, 50)
-                traj_z = np.linspace(0.2, 0.0, 50)
-                ast_x, ast_y, ast_z = plot_dist_scaled * 0.8, plot_dist_scaled * 0.8, 0.1
+                st.markdown('<div class="hazard-card"><div style="font-size:1.1rem; font-weight:bold; color:#ff4444; letter-spacing:1px;">⚠️ DANGER ZONE</div><div style="font-size:1.8rem; font-family:\'Orbitron\'; color:#ff4444;">HAZARD DETECTED</div><p style="font-size:0.8rem; color:#e2e8f0; margin-top:10px;">Asteroid trajectory poses high risk to Earth and orbital Space Stations.</p></div>', unsafe_allow_html=True)
             else:
-                traj_x = np.linspace(plot_dist_scaled * 1.5, -plot_dist_scaled, 50)
-                traj_y = np.linspace(plot_dist_scaled * 1.2, plot_dist_scaled * 0.9, 50)
-                traj_z = np.linspace(0.1, 0.1, 50)
-                ast_x, ast_y, ast_z = plot_dist_scaled, plot_dist_scaled, 0.1
-
-            btn_fig = go.Figure()
+                st.markdown('<div class="safe-card"><div style="font-size:1.1rem; font-weight:bold; color:#00ff88; letter-spacing:1px;">✅ SAFE ZONE</div><div style="font-size:1.8rem; font-family:\'Orbitron\'; color:#00ff88;">STABLE ORBIT</div><p style="font-size:0.8rem; color:#e2e8f0; margin-top:10px;">Trajectory is safe. Planetary defense shields require no intercept protocols.</p></div>', unsafe_allow_html=True)
+        
+        with out2:
+            fig = go.Figure()
+            fig.add_trace(go.Scatter3d(x=[0], y=[0], z=[0], mode='markers+text', marker=dict(size=14, color='#2e86c1'), text=['Earth'], name='Earth'))
+            fig.add_trace(go.Scatter3d(x=[0.1], y=[0.1], z=[0.05], mode='markers+text', marker=dict(size=6, color='#00ff88', symbol='diamond'), text=['ISS Station'], name='Space Station'))
             
-            btn_fig.add_trace(go.Scatter3d(
-                x=np.random.uniform(-2, 2, 80), y=np.random.uniform(-2, 2, 80), z=np.random.uniform(-2, 2, 80),
-                mode='markers', marker=dict(size=1, color='white', opacity=0.25), showlegend=False, hoverinfo='none'
-            ))
-            btn_fig.add_trace(go.Scatter3d(
-                x=[0], y=[0], z=[0], mode='markers',
-                marker=dict(size=14, color='#2e86c1', line=dict(color='#85c1e9', width=2)), name='🌍 Earth'
-            ))
+            ast_color = '#ff4444' if pred == 1 else '#00ff88'
+            fig.add_trace(go.Scatter3d(x=[0.4], y=[0.5], z=[0.2], mode='markers+text', marker=dict(size=9, color=ast_color), text=['Target Asteroid'], name='Asteroid'))
+            fig.add_trace(go.Scatter3d(x=[0.8, 0.4, 0], y=[0.9, 0.5, 0], z=[0.4, 0.2, 0], mode='lines', line=dict(color='rgba(255,255,255,0.2)', width=2, dash='dash'), name='Trajectory Path'))
             
-            theta = np.linspace(0, 2*np.pi, 100)
-            btn_fig.add_trace(go.Scatter3d(
-                x=0.15*np.cos(theta), y=0.15*np.sin(theta), z=np.zeros(100),
-                mode='lines', line=dict(color=shield_line_color, width=2), name='🛡️ Shield Deflection Deflector'
-            ))
-            btn_fig.add_trace(go.Scatter3d(
-                x=[ast_x], y=[ast_y], z=[ast_z], mode='markers',
-                marker=dict(size=ast_size_scaled, color=theme_color, line=dict(color='white', width=1)), name='☄️ Asteroid'
-            ))
-            btn_fig.add_trace(go.Scatter3d(
-                x=traj_x, y=traj_y, z=traj_z, mode='lines',
-                line=dict(color='rgba(255,255,255,0.2)', width=2, dash='longdash'), name='Trajectory Vector', hoverinfo='none'
-            ))
-
-            btn_fig.update_layout(
-                paper_bgcolor='#03030c', scene=dict(bgcolor='#03030c', xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False), aspectmode='data'),
-                margin=dict(l=0, r=0, t=0, b=0), height=280, showlegend=True, legend=dict(font=dict(color='white', size=8), bgcolor='rgba(0,0,20,0.6)', x=0.01, y=0.99)
-            )
-            st.plotly_chart(btn_fig, use_container_width=True)
-
-        st.markdown("<br>", unsafe_allow_html=True)
-        with st.expander("📊 AI CORE NEURAL METRICS & FEATURE INSIGHTS"):
-            m_left, m_right = st.columns([1.1, 1.9], gap="medium")
-            
-            with m_left:
-                st.markdown("""
-                <table class="metrics-table">
-                    <tr><th>METRIC KEY</th><th>EVALUATION VALUE</th></tr>
-                    <tr><td>Model Engine</td><td>Random Forest / XGB Matrix</td></tr>
-                    <tr><td>Core Accuracy</td><td>94.62%</td></tr>
-                    <tr><td>Precision Score</td><td>92.15%</td></tr>
-                    <tr><td>Recall Rate</td><td>91.80%</td></tr>
-                    <tr><td>ROC-AUC Curve</td><td>0.978</td></tr>
-                </table>
-                """, unsafe_allow_html=True)
-                
-            with m_right:
-                f_names = ['Mag (H)', 'Min Dia', 'Max Dia', 'Miss Dist', 'Velocity', 'Diameter', 'Threat Ix', 'Kinetic E']
-                f_importance = [0.12, 0.07, 0.08, 0.24, 0.14, 0.09, 0.16, 0.10]
-                
-                feat_fig = go.Figure(go.Bar(
-                    x=f_importance, y=f_names, orientation='h',
-                    marker=dict(color='rgba(0, 242, 254, 0.6)', line=dict(color='#00f2fe', width=1))
-                ))
-                feat_fig.update_layout(
-                    paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-                    margin=dict(l=10, r=10, t=10, b=10), height=250,
-                    xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', tickfont=dict(color='#7f8c8d', size=9)),
-                    yaxis=dict(tickfont=dict(color='#e2e8f0', size=9, family='Orbitron'))
-                )
-                st.plotly_chart(feat_fig, use_container_width=True)
-
+            fig.update_layout(
+                paper_bgcolor='rgba(0,0,0,0)', 
+                plot_bgcolor='rgba(0,0,0,0)',
+                scene=dict(xaxis=dict(visible=False), yaxis=dict(visible=False), zaxis=dict(visible=False)), 
+                margin=dict(l=0,r=0,t
 with tab2:
     st.caption("Live Feed Status: Connected to JPL Horizons.")
 
